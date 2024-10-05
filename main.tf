@@ -11,7 +11,11 @@ terraform {
 
 provider "azurerm" {
   features {}
+  subscription_id = "32f8356a-aee0-4b56-804a-2e56a7ea610c"
 }
+
+
+
 
 resource "azurerm_resource_group" "this" {
   name     = "this-rg"
@@ -41,7 +45,7 @@ resource "azurerm_network_interface" "this" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.this.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.this
+    public_ip_address_id = azurerm_public_ip.this.id
   }
 }
 
@@ -51,7 +55,7 @@ resource "azurerm_windows_virtual_machine" "example" {
   location            = azurerm_resource_group.this.location
   size                = "Standard_F2"
   admin_username      = "eazynet"
-  admin_password      = "eazy.net"
+  admin_password      = "EAZYtune21!"
   network_interface_ids = [
     azurerm_network_interface.this.id,
   ]
@@ -75,4 +79,29 @@ resource "azurerm_public_ip" "this" {
   location            = azurerm_resource_group.this.location
   allocation_method   = "Static"
 
+
+}
+resource "azurerm_network_security_group" "this" {
+  name                = "this-energy"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+
+  security_rule {
+    name                       = "test123"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+
+}
+
+resource "azurerm_subnet_network_security_group_association" "this" {
+  subnet_id                 = azurerm_subnet.this.id
+  network_security_group_id = azurerm_network_security_group.this.id
 }
